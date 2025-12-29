@@ -39,7 +39,7 @@ var hashCmd = &cobra.Command{
 		hasher, ok := hash.GetAlgorithm(algorithm)
 
 		if !ok {
-			return fmt.Errorf("Unknown algorithm: %q", algorithm)
+			return fmt.Errorf("unknown algorithm: %q", algorithm)
 		}
 
 		data := ""
