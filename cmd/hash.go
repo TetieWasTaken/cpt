@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/TetieWasTaken/cpt/internal/hash"
@@ -9,6 +11,7 @@ import (
 )
 
 var (
+	filepath  string
 	algorithm string
 	list      bool
 )
@@ -42,8 +45,22 @@ var hashCmd = &cobra.Command{
 
 		// TODO: allow other types of input (e.g. file)
 
-		data := strings.Join(args, " ")
-		reader := strings.NewReader(data)
+		data := ""
+		var reader io.Reader
+
+		if filepath != "" {
+			file, err := os.Open(filepath)
+			if err != nil {
+				return err
+			}
+
+			defer file.Close()
+
+			reader = file
+		} else {
+			data = strings.Join(args, " ")
+			reader = strings.NewReader(data)
+		}
 
 		sum, err := hasher.Hash(reader)
 		if err != nil {
@@ -58,6 +75,7 @@ var hashCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(hashCmd)
 
+	hashCmd.Flags().StringVarP(&filepath, "file", "f", "", "Hash a specific file.")
 	hashCmd.Flags().StringVarP(&algorithm, "algorithm", "a", "sha256", "Which hash algorithm to use (e.g. sha256).")
 	hashCmd.Flags().BoolVarP(&list, "list", "l", false, "Lists all available algorithms.")
 }
