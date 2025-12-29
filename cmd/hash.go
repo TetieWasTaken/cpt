@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -57,9 +58,11 @@ var hashCmd = &cobra.Command{
 			defer file.Close()
 
 			reader = file
-		} else {
+		} else if len(args) > 0 {
 			data = strings.Join(args, " ")
 			reader = strings.NewReader(data)
+		} else {
+			reader = bufio.NewReader(os.Stdin)
 		}
 
 		sum, err := hasher.Hash(reader)
