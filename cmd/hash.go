@@ -56,7 +56,7 @@ var hashCmd = &cobra.Command{
 		} else if len(args) > 0 {
 			data = strings.Join(args, " ")
 			reader = strings.NewReader(data)
-		} else if file, error := os.Stdin.Stat(); error == nil && file.Mode()&os.ModeCharDevice == 0 {
+		} else if file, err := os.Stdin.Stat(); err == nil && file.Mode()&os.ModeCharDevice == 0 {
 			reader = bufio.NewReader(os.Stdin)
 		} else {
 			return fmt.Errorf("no input found, please provide data to hash")
