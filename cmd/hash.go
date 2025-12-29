@@ -31,7 +31,7 @@ var hashCmd = &cobra.Command{
 		cpt hash "The quick brown fox jumps over the lazy dog"`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if list {
-			fmt.Println(hash.ListAlgorithms())
+			fmt.Println(strings.Join(hash.ListAlgorithms(), "\n"))
 			return nil
 		}
 
