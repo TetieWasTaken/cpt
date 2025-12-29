@@ -25,7 +25,7 @@ var hashCmd = &cobra.Command{
 
 		Example:
 		cpt hash "The quick brown fox jumps over the lazy dog"`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if list {
 			fmt.Println(hash.ListAlgorithms())
 			return nil
@@ -35,8 +35,7 @@ var hashCmd = &cobra.Command{
 		hasher, ok := hash.GetAlgorithm(algorithm)
 
 		if !ok {
-			fmt.Errorf("Unknown algorithm: %q", algorithm)
-			return
+			return fmt.Errorf("Unknown algorithm: %q", algorithm)
 
 			// TODO: Also return help menu or list of algorithms
 		}
@@ -48,13 +47,11 @@ var hashCmd = &cobra.Command{
 
 		sum, err := hasher.Hash(reader)
 		if err != nil {
-			println("error")
-			println(err.Error())
-			fmt.Println(err)
-			return
+			return err
 		}
 
 		fmt.Fprintln(cmd.OutOrStdout(), hash.HexDigest(sum))
+		return nil
 	},
 }
 
