@@ -8,7 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var algorithm string
+var (
+	algorithm string
+	list      bool
+)
 
 // hashCmd represents the hash command
 var hashCmd = &cobra.Command{
@@ -23,6 +26,11 @@ var hashCmd = &cobra.Command{
 		Example:
 		cpt hash "The quick brown fox jumps over the lazy dog"`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if list {
+			fmt.Println(hash.ListAlgorithms())
+			return nil
+		}
+
 		fmt.Fprintf(cmd.ErrOrStderr(), "Attempting to hash using %q\n", algorithm)
 		hasher, ok := hash.GetAlgorithm(algorithm)
 
@@ -53,15 +61,6 @@ var hashCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(hashCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// hashCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// hashCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
-	hashCmd.Flags().StringVarP(&algorithm, "algorithm", "a", "sha256", "Which hash algorithm to use (e.g. sha256)")
+	hashCmd.Flags().StringVarP(&algorithm, "algorithm", "a", "sha256", "Which hash algorithm to use (e.g. sha256).")
+	hashCmd.Flags().BoolVarP(&list, "list", "l", false, "Lists all available algorithms.")
 }
