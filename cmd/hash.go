@@ -40,11 +40,7 @@ var hashCmd = &cobra.Command{
 
 		if !ok {
 			return fmt.Errorf("Unknown algorithm: %q", algorithm)
-
-			// TODO: Also return help menu or list of algorithms
 		}
-
-		// TODO: allow other types of input (e.g. file)
 
 		data := ""
 		var reader io.Reader
