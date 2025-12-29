@@ -58,8 +58,6 @@ type cryptoHash struct {
 func (cryptoHasher cryptoHash) Name() string { return cryptoHasher.name }
 func (cryptoHasher cryptoHash) Hash(data io.Reader) ([]byte, error) {
 	if !cryptoHasher.hasher.Available() {
-		fmt.Println(cryptoHasher)
-		fmt.Println(cryptoHasher.hasher)
 		return nil, fmt.Errorf("%s is not available", cryptoHasher.name)
 	}
 

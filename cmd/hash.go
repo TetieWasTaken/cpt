@@ -35,7 +35,6 @@ var hashCmd = &cobra.Command{
 			return nil
 		}
 
-		fmt.Fprintf(cmd.ErrOrStderr(), "Attempting to hash using %q\n", algorithm)
 		hasher, ok := hash.GetAlgorithm(algorithm)
 
 		if !ok {
