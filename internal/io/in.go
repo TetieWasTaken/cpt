@@ -1,4 +1,4 @@
-package io
+package clio
 
 import (
 	"bufio"
