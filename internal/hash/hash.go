@@ -4,6 +4,7 @@ package hash
 import (
 	"crypto"
 	"fmt"
+	"hash"
 	"io"
 	"sort"
 )
@@ -56,6 +57,7 @@ type cryptoHash struct {
 }
 
 func (cryptoHasher cryptoHash) Name() string { return cryptoHasher.name }
+
 func (cryptoHasher cryptoHash) Hash(data io.Reader) ([]byte, error) {
 	if !cryptoHasher.hasher.Available() {
 		return nil, fmt.Errorf("%s is not available", cryptoHasher.name)
@@ -65,6 +67,22 @@ func (cryptoHasher cryptoHash) Hash(data io.Reader) ([]byte, error) {
 
 	if _, error := io.Copy(hasher, data); error != nil {
 		return nil, error
+	}
+
+	return hasher.Sum(nil), nil
+}
+
+type externalHash struct {
+	name string
+	new  func() hash.Hash
+}
+
+func (externalHasher externalHash) Name() string { return externalHasher.name }
+
+func (externalHasher externalHash) Hash(data io.Reader) ([]byte, error) {
+	hasher := externalHasher.new()
+	if _, err := io.Copy(hasher, data); err != nil {
+		return nil, err
 	}
 
 	return hasher.Sum(nil), nil

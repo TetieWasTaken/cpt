@@ -6,5 +6,5 @@ import (
 )
 
 func init() {
-	RegisterAlgorithm(cryptoHash{name: "sha512_256", hasher: crypto.SHA512_256})
+	RegisterAlgorithm(cryptoHash{name: "sha512-256", hasher: crypto.SHA512_256})
 }
