@@ -3,7 +3,6 @@ package hash
 
 import (
 	"crypto"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"sort"
@@ -69,8 +68,4 @@ func (cryptoHasher cryptoHash) Hash(data io.Reader) ([]byte, error) {
 	}
 
 	return hasher.Sum(nil), nil
-}
-
-func HexDigest(sum []byte) string {
-	return hex.EncodeToString(sum)
 }
