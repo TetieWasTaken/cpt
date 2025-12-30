@@ -50,13 +50,17 @@ func newHashCmd() *cobra.Command {
 					return err
 				}
 
-				defer file.Close()
+				defer func() {
+					if err := file.Close(); err != nil {
+						fmt.Println(err)
+					}
+				}()
 
 				reader = file
 			} else if len(args) > 0 {
 				data = strings.Join(args, " ")
 				reader = strings.NewReader(data)
-			} else if file, err := os.Stdin.Stat(); err == nil && file.Mode()&os.ModeCharDevice == 0 {
+			} else if stat, err := os.Stdin.Stat(); err == nil && stat.Mode()&os.ModeCharDevice == 0 {
 				reader = bufio.NewReader(os.Stdin)
 			} else {
 				return fmt.Errorf("no input found, please provide data to hash")
@@ -67,8 +71,9 @@ func newHashCmd() *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(cmd.OutOrStdout(), hash.HexDigest(sum))
-			return nil
+			_, err = fmt.Fprintln(cmd.OutOrStdout(), hash.HexDigest(sum))
+
+			return err
 		},
 	}
 
