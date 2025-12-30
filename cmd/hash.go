@@ -16,6 +16,7 @@ func newHashCmd() *cobra.Command {
 		filepath  string
 		algorithm string
 		list      bool
+		out       string
 	)
 
 	cmd := &cobra.Command{
@@ -83,13 +84,26 @@ func newHashCmd() *cobra.Command {
 				return err
 			}
 
-			_, err = fmt.Fprintln(cmd.OutOrStdout(), hash.HexDigest(sum))
+			writer := cmd.OutOrStdout()
+			if out != "" {
+				f, err := os.Create(out)
+				if err != nil {
+					return err
+				}
+
+				defer f.Close()
+				writer = f
+
+				fmt.Printf("Wrote output to %s\n", out)
+			}
+
+			_, err = fmt.Fprintln(writer, hash.HexDigest(sum))
 
 			return err
 		},
 	}
 
-	cmd.Flags().StringVarP(&filepath, "file", "f", "", "Hash a specific file.")
+	cmd.Flags().StringVarP(&filepath, "file", "f", "", "Hash the contents of a specific file.")
 	cmd.Flags().StringVarP(&algorithm, "algorithm", "a", "sha256", "Which hash algorithm to use (e.g. sha256).")
 	cmd.RegisterFlagCompletionFunc(
 		"algorithm",
@@ -98,7 +112,8 @@ func newHashCmd() *cobra.Command {
 		},
 	)
 	cmd.Flags().BoolVarP(&list, "list", "l", false, "Lists all available algorithms.")
-	// TODO: add --verbose and --out
+	cmd.Flags().StringVarP(&out, "out", "o", "", "Output to a specific file.")
+	// TODO: add --verbose
 
 	return cmd
 }
