@@ -46,7 +46,7 @@ func newHashCmd() *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if list {
-				fmt.Println(strings.Join(hash.ListAlgorithms(), "\n"))
+				fmt.Println(cmd.OutOrStdout(), strings.Join(hash.ListAlgorithms(), "\n"))
 				return nil
 			}
 
@@ -94,7 +94,7 @@ func newHashCmd() *cobra.Command {
 				defer f.Close()
 				writer = f
 
-				fmt.Printf("Wrote output to %s\n", out)
+				fmt.Fprintf(cmd.ErrOrStderr(), "Wrote output to %s\n", out)
 			}
 
 			_, err = fmt.Fprintln(writer, hash.HexDigest(sum))
