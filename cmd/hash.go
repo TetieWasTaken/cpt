@@ -44,6 +44,10 @@ func newHashCmd() *cobra.Command {
 			data := ""
 			var reader io.Reader
 
+			if filepath != "" && len(args) > 0 {
+				return fmt.Errorf("cannot use both file and arguments, please only enter one input source")
+			}
+
 			if filepath != "" {
 				file, err := os.Open(filepath)
 				if err != nil {
