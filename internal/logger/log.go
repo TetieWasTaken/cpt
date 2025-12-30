@@ -16,7 +16,7 @@ func Vprintf(cmd *cobra.Command, format string, args ...any) error {
 		return nil
 	}
 
-	prefix := fmt.Sprintf(" %s ", time.Now().Format("2006-01-02 15:04:05.000"))
+	prefix := fmt.Sprintf("%s ", time.Now().Format("2006-01-02 15:04:05.000"))
 
 	pc, file, line, ok := runtime.Caller(1)
 	fn := runtime.FuncForPC(pc).Name()

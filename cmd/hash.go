@@ -46,7 +46,7 @@ func newHashCmd() *cobra.Command {
 			hasher, ok := hash.GetAlgorithm(flags.algorithm)
 
 			if !ok {
-				return fmt.Errorf("unknown algorithm: %q", flags.algorithm)
+				return fmt.Errorf("unknown algorithm: %q (use --list to view available algorithms)", flags.algorithm)
 			}
 
 			if err := logger.Vprintf(cmd, "Using algorithm %s", flags.algorithm); err != nil {
