@@ -78,4 +78,5 @@ func init() {
 	hashCmd.Flags().StringVarP(&filepath, "file", "f", "", "Hash a specific file.")
 	hashCmd.Flags().StringVarP(&algorithm, "algorithm", "a", "sha256", "Which hash algorithm to use (e.g. sha256).")
 	hashCmd.Flags().BoolVarP(&list, "list", "l", false, "Lists all available algorithms.")
+	// TODO: add --verbose and --out
 }
