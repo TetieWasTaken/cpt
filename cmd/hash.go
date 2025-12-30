@@ -11,72 +11,71 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	filepath  string
-	algorithm string
-	list      bool
-)
+func newHashCmd() *cobra.Command {
+	var (
+		filepath  string
+		algorithm string
+		list      bool
+	)
 
-// hashCmd represents the hash command
-var hashCmd = &cobra.Command{
-	Use:   "hash",
-	Short: "Maps a string to a unique string with a fixed length that cannot be reversed.",
-	Long: `Uses one-way deterministic algorithms to create a fixed-length string that:
-		1. Cannot be feasibly reversed.
-		2. Is unique to the input.
+	cmd := &cobra.Command{
+		Use:   "hash",
+		Short: "Maps a string to a unique string with a fixed length that cannot be reversed.",
+		Long: `Uses one-way deterministic algorithms to create a fixed-length string that:
+			1. Cannot be feasibly reversed.
+			2. Is unique to the input.
 
-		One common application of cryptographic hash functions is to store passwords safely.
+			One common application of cryptographic hash functions is to store passwords safely.
 
-		Example:
-		cpt hash "The quick brown fox jumps over the lazy dog"`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if list {
-			fmt.Println(strings.Join(hash.ListAlgorithms(), "\n"))
-			return nil
-		}
+			Example:
+			cpt hash "The quick brown fox jumps over the lazy dog"`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if list {
+				fmt.Println(strings.Join(hash.ListAlgorithms(), "\n"))
+				return nil
+			}
 
-		hasher, ok := hash.GetAlgorithm(algorithm)
+			hasher, ok := hash.GetAlgorithm(algorithm)
 
-		if !ok {
-			return fmt.Errorf("unknown algorithm: %q", algorithm)
-		}
+			if !ok {
+				return fmt.Errorf("unknown algorithm: %q", algorithm)
+			}
 
-		data := ""
-		var reader io.Reader
+			data := ""
+			var reader io.Reader
 
-		if filepath != "" {
-			file, err := os.Open(filepath)
+			if filepath != "" {
+				file, err := os.Open(filepath)
+				if err != nil {
+					return err
+				}
+
+				defer file.Close()
+
+				reader = file
+			} else if len(args) > 0 {
+				data = strings.Join(args, " ")
+				reader = strings.NewReader(data)
+			} else if file, err := os.Stdin.Stat(); err == nil && file.Mode()&os.ModeCharDevice == 0 {
+				reader = bufio.NewReader(os.Stdin)
+			} else {
+				return fmt.Errorf("no input found, please provide data to hash")
+			}
+
+			sum, err := hasher.Hash(reader)
 			if err != nil {
 				return err
 			}
 
-			defer file.Close()
+			fmt.Fprintln(cmd.OutOrStdout(), hash.HexDigest(sum))
+			return nil
+		},
+	}
 
-			reader = file
-		} else if len(args) > 0 {
-			data = strings.Join(args, " ")
-			reader = strings.NewReader(data)
-		} else if file, err := os.Stdin.Stat(); err == nil && file.Mode()&os.ModeCharDevice == 0 {
-			reader = bufio.NewReader(os.Stdin)
-		} else {
-			return fmt.Errorf("no input found, please provide data to hash")
-		}
-
-		sum, err := hasher.Hash(reader)
-		if err != nil {
-			return err
-		}
-
-		fmt.Fprintln(cmd.OutOrStdout(), hash.HexDigest(sum))
-		return nil
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(hashCmd)
-
-	hashCmd.Flags().StringVarP(&filepath, "file", "f", "", "Hash a specific file.")
-	hashCmd.Flags().StringVarP(&algorithm, "algorithm", "a", "sha256", "Which hash algorithm to use (e.g. sha256).")
-	hashCmd.Flags().BoolVarP(&list, "list", "l", false, "Lists all available algorithms.")
+	cmd.Flags().StringVarP(&filepath, "file", "f", "", "Hash a specific file.")
+	cmd.Flags().StringVarP(&algorithm, "algorithm", "a", "sha256", "Which hash algorithm to use (e.g. sha256).")
+	cmd.Flags().BoolVarP(&list, "list", "l", false, "Lists all available algorithms.")
 	// TODO: add --verbose and --out
+
+	return cmd
 }
