@@ -55,7 +55,6 @@ func newHashCmd() *cobra.Command {
 				return fmt.Errorf("unknown algorithm: %q", algorithm)
 			}
 
-			data := ""
 			var reader io.Reader
 
 			if filepath != "" {
@@ -66,14 +65,13 @@ func newHashCmd() *cobra.Command {
 
 				defer func() {
 					if err := file.Close(); err != nil {
-						fmt.Println(err)
+						fmt.Println(cmd.ErrOrStderr(), err)
 					}
 				}()
 
 				reader = file
 			} else if len(args) > 0 {
-				data = strings.Join(args, " ")
-				reader = strings.NewReader(data)
+				reader = strings.NewReader(strings.Join(args, " "))
 			} else if stat, err := os.Stdin.Stat(); err == nil && stat.Mode()&os.ModeCharDevice == 0 {
 				reader = bufio.NewReader(os.Stdin)
 			} else {
@@ -93,6 +91,12 @@ func newHashCmd() *cobra.Command {
 
 	cmd.Flags().StringVarP(&filepath, "file", "f", "", "Hash a specific file.")
 	cmd.Flags().StringVarP(&algorithm, "algorithm", "a", "sha256", "Which hash algorithm to use (e.g. sha256).")
+	cmd.RegisterFlagCompletionFunc(
+		"algorithm",
+		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return hash.ListAlgorithms(), cobra.ShellCompDirectiveNoFileComp
+		},
+	)
 	cmd.Flags().BoolVarP(&list, "list", "l", false, "Lists all available algorithms.")
 	// TODO: add --verbose and --out
 
