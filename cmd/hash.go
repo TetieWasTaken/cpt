@@ -86,12 +86,6 @@ func newHashCmd() *cobra.Command {
 
 	cmd.Flags().StringVarP(&filepath, "file", "f", "", "Hash the contents of a specific file.")
 	cmd.Flags().StringVarP(&algorithm, "algorithm", "a", "sha256", "Which hash algorithm to use (e.g. sha256).")
-	cmd.RegisterFlagCompletionFunc(
-		"algorithm",
-		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return hash.ListAlgorithms(), cobra.ShellCompDirectiveNoFileComp
-		},
-	)
 	cmd.Flags().BoolVarP(&list, "list", "l", false, "Lists all available algorithms.")
 	cmd.Flags().StringVarP(&out, "out", "o", "", "Output to a specific file.")
 	// TODO: add --verbose
