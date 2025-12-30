@@ -1,3 +1,4 @@
+// Package cmd is the primary package that deals with the handling and registration of cobra commands.
 package cmd
 
 import (

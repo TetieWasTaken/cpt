@@ -1,3 +1,4 @@
+// Package hash implements all the hashing algorithms and their helper utilities.
 package hash
 
 import (
