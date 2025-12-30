@@ -29,6 +29,20 @@ func newHashCmd() *cobra.Command {
 
 			Example:
 			cpt hash "The quick brown fox jumps over the lazy dog"`,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if filepath == "" && len(args) == 0 {
+				if stat, err := os.Stdin.Stat(); err == nil && stat.Mode()&os.ModeCharDevice == 0 {
+					return nil
+				}
+				return fmt.Errorf("no input provided")
+			}
+
+			if filepath != "" && len(args) > 0 {
+				return fmt.Errorf("cannot use both file and arguments, please only enter one input source")
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if list {
 				fmt.Println(strings.Join(hash.ListAlgorithms(), "\n"))
@@ -43,10 +57,6 @@ func newHashCmd() *cobra.Command {
 
 			data := ""
 			var reader io.Reader
-
-			if filepath != "" && len(args) > 0 {
-				return fmt.Errorf("cannot use both file and arguments, please only enter one input source")
-			}
 
 			if filepath != "" {
 				file, err := os.Open(filepath)
