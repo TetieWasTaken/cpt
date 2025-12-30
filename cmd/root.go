@@ -4,6 +4,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/TetieWasTaken/cpt/internal/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +28,8 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.PersistentFlags().BoolVar(&logger.Verbose, "verbose", false, "Enable verbose output.")
+
 	rootCmd.AddCommand(newHashCmd())
 	rootCmd.AddCommand(newCipherCmd())
 }

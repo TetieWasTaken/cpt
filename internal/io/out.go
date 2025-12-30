@@ -5,9 +5,13 @@ import (
 	"os"
 )
 
-func OpenOutput(path string, out io.Writer) (io.WriteCloser, error) {
+func OpenOutput(path string, out io.Writer, vlog func(format string, a ...any) error) (io.WriteCloser, error) {
 	if path == "" {
 		return nopWriteCloser{out}, nil
+	}
+
+	if vlog != nil {
+		_ = vlog("Writing output to %s.", path)
 	}
 
 	return os.Create(path)

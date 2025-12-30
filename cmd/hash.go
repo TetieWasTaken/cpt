@@ -7,6 +7,7 @@ import (
 
 	"github.com/TetieWasTaken/cpt/internal/hash"
 	clio "github.com/TetieWasTaken/cpt/internal/io"
+	logger "github.com/TetieWasTaken/cpt/internal/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -34,6 +35,7 @@ func newHashCmd() *cobra.Command {
 				if stat, err := os.Stdin.Stat(); err == nil && stat.Mode()&os.ModeCharDevice == 0 {
 					return nil
 				}
+
 				return fmt.Errorf("no input provided")
 			}
 
@@ -55,7 +57,13 @@ func newHashCmd() *cobra.Command {
 				return fmt.Errorf("unknown algorithm: %q", algorithm)
 			}
 
-			reader, err := clio.ParseInput(args, filepath)
+			if err := logger.Vprintf(cmd, "Using algorithm %s", algorithm); err != nil {
+				return err
+			}
+
+			reader, err := clio.ParseInput(args, filepath, func(format string, a ...any) error {
+				return logger.Vprintf(cmd, format, a...)
+			})
 			if err != nil {
 				return err
 			}
@@ -69,7 +77,9 @@ func newHashCmd() *cobra.Command {
 				return err
 			}
 
-			writer, err := clio.OpenOutput(out, cmd.OutOrStdout())
+			writer, err := clio.OpenOutput(out, cmd.OutOrStdout(), func(format string, a ...any) error {
+				return logger.Vprintf(cmd, format, a...)
+			})
 			if err != nil {
 				return err
 			}
@@ -88,7 +98,6 @@ func newHashCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&algorithm, "algorithm", "a", "sha256", "Which hash algorithm to use (e.g. sha256).")
 	cmd.Flags().BoolVarP(&list, "list", "l", false, "Lists all available algorithms.")
 	cmd.Flags().StringVarP(&out, "out", "o", "", "Output to a specific file.")
-	// TODO: add --verbose
 
 	return cmd
 }
