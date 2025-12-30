@@ -1,13 +1,12 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 
 	"github.com/TetieWasTaken/cpt/internal/hash"
+	clio "github.com/TetieWasTaken/cpt/internal/io"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +45,7 @@ func newHashCmd() *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if list {
-				fmt.Println(cmd.OutOrStdout(), strings.Join(hash.ListAlgorithms(), "\n"))
+				fmt.Fprintln(cmd.OutOrStdout(), strings.Join(hash.ListAlgorithms(), "\n"))
 				return nil
 			}
 
@@ -56,46 +55,28 @@ func newHashCmd() *cobra.Command {
 				return fmt.Errorf("unknown algorithm: %q", algorithm)
 			}
 
-			var reader io.Reader
-
-			if filepath != "" {
-				file, err := os.Open(filepath)
-				if err != nil {
-					return err
-				}
-
-				defer func() {
-					if err := file.Close(); err != nil {
-						fmt.Println(cmd.ErrOrStderr(), err)
-					}
-				}()
-
-				reader = file
-			} else if len(args) > 0 {
-				reader = strings.NewReader(strings.Join(args, " "))
-			} else if stat, err := os.Stdin.Stat(); err == nil && stat.Mode()&os.ModeCharDevice == 0 {
-				reader = bufio.NewReader(os.Stdin)
-			} else {
-				return fmt.Errorf("no input found, please provide data to hash")
+			reader, err := clio.ParseInput(args, filepath)
+			if err != nil {
+				return err
 			}
+
+			defer clio.Close(reader, func(err error) {
+				fmt.Fprintln(cmd.ErrOrStderr(), err)
+			})
 
 			sum, err := hasher.Hash(reader)
 			if err != nil {
 				return err
 			}
 
-			writer := cmd.OutOrStdout()
-			if out != "" {
-				f, err := os.Create(out)
-				if err != nil {
-					return err
-				}
-
-				defer f.Close()
-				writer = f
-
-				fmt.Fprintf(cmd.ErrOrStderr(), "Wrote output to %s\n", out)
+			writer, err := clio.OpenOutput(out, cmd.OutOrStdout())
+			if err != nil {
+				return err
 			}
+
+			defer clio.Close(writer, func(err error) {
+				fmt.Fprintln(cmd.ErrOrStderr(), err)
+			})
 
 			_, err = fmt.Fprintln(writer, hash.HexDigest(sum))
 
