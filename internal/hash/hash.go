@@ -87,3 +87,23 @@ func (externalHasher externalHash) Hash(data io.Reader) ([]byte, error) {
 
 	return hasher.Sum(nil), nil
 }
+
+type externalHashErr struct {
+	name string
+	new  func() (hash.Hash, error)
+}
+
+func (externalHasher externalHashErr) Name() string { return externalHasher.name }
+
+func (externalHasher externalHashErr) Hash(data io.Reader) ([]byte, error) {
+	hasher, err := externalHasher.new()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := io.Copy(hasher, data); err != nil {
+		return nil, err
+	}
+
+	return hasher.Sum(nil), nil
+}
