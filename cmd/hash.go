@@ -49,7 +49,7 @@ func newHashCmd() *cobra.Command {
 				return fmt.Errorf("unknown algorithm: %q (use --list to view available algorithms)", flags.algorithm)
 			}
 
-			if err := logger.Vprintf(cmd, "Using algorithm %s", flags.algorithm); err != nil {
+			if err := logger.Vprintf(cmd, "Using algorithm %s.", flags.algorithm); err != nil {
 				return err
 			}
 
