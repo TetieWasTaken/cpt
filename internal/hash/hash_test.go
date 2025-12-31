@@ -38,12 +38,11 @@ func TestHash(t *testing.T) {
 		hasher, ok := GetAlgorithm(algorithm)
 
 		if !ok {
-			t.Errorf("GetAlgorithm() was unable to find %s", algorithm)
+			t.Fatalf("GetAlgorithm() was unable to find %s", algorithm)
 		}
 
-		result, error := hasher.Hash(strings.NewReader("The quick brown fox jumps over the lazy dog"))
-
-		if error != nil {
+		result, err := hasher.Hash(strings.NewReader("The quick brown fox jumps over the lazy dog"))
+		if err != nil {
 			t.Errorf("Hash() resulted in an error")
 		}
 
